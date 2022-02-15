@@ -1,0 +1,5 @@
+#ignore API keys
+.env
+
+#ignore node modules folder
+node_modules
