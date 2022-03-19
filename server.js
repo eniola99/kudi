@@ -21,6 +21,7 @@ const userRouter = require('./router/user')
 app.use('/auth', authRouter)
 app.use('/auth/user', userRouter)
 
+
 app.use((req, res, next) => {
     res.status(404).send("Sorry can't find that!")
   })

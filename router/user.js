@@ -17,7 +17,7 @@ router.get("/find/:id", async (req, res) => {
 
 //GET ALL USER
 router.get("/find", async (req, res) => {
-    try {
+    try {        
         const usersList = await users.find()
         res.status(200).json(usersList)
     } catch (err) {
@@ -34,9 +34,9 @@ router.put("/:id", verify, async (req, res) => {
         }
     try {
         const updateUser = await users.findByIdAndUpdate(req.params.id, {$set: req.body}, {new: true})
-        res.status(200).json(`${updateUser.email} as been updated`)
+        res.status(200).json(`${updateUser.email} user account as been updated`)
     } catch (err) {
-        res.status(500).json(err)
+        res.status(500).json("no")
     }
     }else{
         res.status(403).json('not authenticated')
@@ -51,7 +51,7 @@ router.delete("/:id", verify, async (req, res) => {
         await users.findByIdAndDelete(req.params.id)
         res.status(200).json(`account as been deleted`)
     } catch (err) {
-        res.status(500).json(err)
+        res.status(500).json(`can't delete user`)
     }
     }else{
         res.status(403).json('not authenticated')
