@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv')
 
 dotenv.config()
@@ -9,6 +8,8 @@ const userSchema = new mongoose.Schema(
         lastName: String,
         email: {type: String, unique: true},
         password: String,
+        wallet_publicAddress: String,
+        wallet_privateAddress: String,
         is_verified: {type: Boolean, default: false, required: true},
     },
     { timestamps: true }

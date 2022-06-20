@@ -4,20 +4,16 @@ const dotenv = require('dotenv')
 const jwt = require('jsonwebtoken')
 const users = require('../models/user')
 const nodemailer = require('nodemailer')
+const { google } = require('googleapis');
 const Token = require('../models/token')
 const crypto = require('crypto')
+const CoinKey = require('coinkey')
 
 
 const router = express.Router()
 dotenv.config()
 
-const transport = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-        user:  process.env.AUTH_USER,
-        pass: process.env.AUTH_PASS,
-    }
-})
+const wallet = new CoinKey.createRandom()
 
 router.post('/register', async(req, res) => {
     users.findOne({email: req.body.email}, async(error, user) => {
@@ -35,6 +31,8 @@ router.post('/register', async(req, res) => {
                 firstName: req.body.firstName,
                 lastName: req.body.lastName,
                 email: req.body.email,
+                wallet_publicAddress: wallet.publicAddress,
+                wallet_privateAddress: CryptoJS.AES.encrypt(wallet.privateKey.toString('hex'), process.env.MY_SECRET_KEY).toString(),
                 password: CryptoJS.AES.encrypt(req.body.password, process.env.MY_SECRET_KEY).toString(),
             })
             try{
@@ -51,26 +49,56 @@ router.post('/register', async(req, res) => {
     
             const url = `https://kudiii.herokuapp.com/auth/verify/${token.token}`
             
-            const mailOptions = {
-                from:{
-                    name: "kudiCrypto",
-                    address: process.env.AUTH_USER,
-                    },
-                to: `${req.body.email}`,
-                subject: 'WELCOME TO kudiCrypto FAMILY',
-                html: `Click <a href = '${url}'>here</a> to confirm your email.`
-            };
-
-            transport.sendMail(mailOptions, (error, info) => {
-                if (error) {
-                    console.log(error)
-                } else { 
-                    console.log(info.response)  
-                res.json({
-                    status: 'verification mail sent successfully'
+            async function sendMail() {
+                const CLIENT_EMAIL = process.env.APP_MAIL;
+                const CLIENT_ID = process.env.EMAIL_CLIENT_ID;
+                const CLIENT_SECRET = process.env.EMAIL_CLIENT_SECRET;
+                const REDIRECT_URL = process.env.EMAIL_CLIENT_REDIRECT_URL;
+                const REFRESH_TOKEN = process.env.EMAIL_REFRESH_TOKEN;
+            
+                const OAuth2Client = new google.auth.OAuth2(
+                    CLIENT_ID,
+                    CLIENT_SECRET,
+                    REDIRECT_URL
+                );
+            
+                OAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN })
+            
+                try {
+                    //generate the access token on the fly
+                    const accessToken = await OAuth2Client.getAccessToken();
+            
+                    //creating the mail envelop
+                    const transport = nodemailer.createTransport({
+                        service: "gmail",
+                        auth: {
+                            type: 'OAuth2',
+                            user: CLIENT_EMAIL,
+                            clientId: CLIENT_ID,
+                            clientSecret: CLIENT_SECRET,
+                            refreshToken: REFRESH_TOKEN,
+                            accessToken: accessToken
+                        }
                     })
+            
+                    const mailOptions = {
+                        from:{
+                            name: "kudiCrypto",
+                            address: process.env.APP_MAIL,
+                            },
+                        to: `${req.body.email}`,
+                        subject: 'WELCOME TO kudiCrypto FAMILY',
+                        html: `Click <a href = '${url}'>here</a> to confirm your email.`
+                    };
+            
+                    const result = await transport.sendMail(mailOptions);
+                    return result
+            
+                } catch (error) {
+                    return error
                 }
-            });
+            }
+            sendMail()
         }
     })
 })
@@ -90,7 +118,7 @@ router.post('/login', async (req, res) => {
 
         originalPassword !== req.body.password && res.status(401).json('wrong password mate')
 
-        const generateToken = jwt.sign({ id: user._id, is_verified: user.is_verified }, process.env.MY_SECRET_KEY, {expiresIn: '3d'})
+        const generateToken = jwt.sign({ id: user._id, is_verified: user.is_verified }, process.env.MY_SECRET_KEY, {expiresIn: '1h'})
 
         const { password, ...info } = user._doc
         res.status(200).json({info, generateToken})
