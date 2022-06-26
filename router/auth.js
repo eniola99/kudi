@@ -26,10 +26,14 @@ router.post('/register', async(req, res) => {
         else if(user) {
             return res.status(500).json(`account already exist`)
         }
+        else if({username: req.body.username}) {
+            return res.status(500).json(`username already exist`)
+        }
         else{
             user = new users({
                 firstName: req.body.firstName,
                 lastName: req.body.lastName,
+                username: req.body.username,
                 email: req.body.email,
                 wallet_publicAddress: wallet.publicAddress,
                 wallet_privateAddress: CryptoJS.AES.encrypt(wallet.privateKey.toString('hex'), process.env.MY_SECRET_KEY).toString(),
@@ -106,19 +110,18 @@ router.post('/register', async(req, res) => {
 //LOGIN
 router.post('/login', async (req, res) => {
     try {
-        const user = await users.findOne({
-            email: req.body.email
-        })
+        const user = await users.findOne({ email: req.body.email })
         if(!user) return res.status(401).json(`user not found`)
-        if(!user.is_verified) return res.status(403).json(`Your mail ${req.body.email}  has not been verified. Please check your mail`);
-
+        if(!user.is_verified) {
+            return res.status(403).json(`Your mail ${req.body.email}  has not been verified. Please check your mail`);
+        }
 
         const bytes  = CryptoJS.AES.decrypt(user.password, process.env.MY_SECRET_KEY)
         const originalPassword = bytes.toString(CryptoJS.enc.Utf8)
 
         originalPassword !== req.body.password && res.status(401).json('wrong password mate')
 
-        const generateToken = jwt.sign({ id: user._id, is_verified: user.is_verified }, process.env.MY_SECRET_KEY, {expiresIn: '1h'})
+        const generateToken = jwt.sign({ id: user._id, is_verified: user.is_verified }, process.env.MY_SECRET_KEY, {expiresIn: '1d'})
 
         const { password, wallet_privateAddress, ...info } = user._doc
         res.status(200).json({info, generateToken})

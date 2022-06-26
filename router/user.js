@@ -2,6 +2,7 @@ const express = require('express')
 const users = require('../models/user')
 const verify = require('../middleware/verifyToken')
 const CryptoJS = require('crypto-js')
+const axios = require('axios')
 
 const router = express.Router()
 
@@ -16,6 +17,18 @@ router.get("/find/:id", verify, async (req, res) => {
     }
 })
 
+//GET WALLET ADDRESS OF ACCOUNT
+router.get("/wallet/balance/:id", verify, async (req, res) => {
+    try {
+        const findWallet = await users.findOne({id: req.params})
+        const walletAddress = findWallet.wallet_publicAddress
+
+        res.status(200).json(walletAddress)
+    } catch (err) {
+        res.status(500).json('something went wrong')
+    }
+})
+
 //GET ALL USER
 router.get("/find", async (req, res) => {
     try {        
@@ -27,7 +40,6 @@ router.get("/find", async (req, res) => {
 })
 
 //UPDATE USER
-
 router.patch("/:id", verify, async (req, res) => {
     if(req.user.id === req.params.id) {
         if(req.body.password) {
@@ -45,7 +57,6 @@ router.patch("/:id", verify, async (req, res) => {
 })
 
 //DELETE USER
-
 router.delete("/:id", verify, async (req, res) => {
     if(req.user.id === req.params.id) {
     try {
