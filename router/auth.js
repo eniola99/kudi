@@ -120,7 +120,7 @@ router.post('/login', async (req, res) => {
 
         const generateToken = jwt.sign({ id: user._id, is_verified: user.is_verified }, process.env.MY_SECRET_KEY, {expiresIn: '1h'})
 
-        const { password, ...info } = user._doc
+        const { password, wallet_privateAddress, ...info } = user._doc
         res.status(200).json({info, generateToken})
 
     } catch (err) {

@@ -6,10 +6,11 @@ const CryptoJS = require('crypto-js')
 const router = express.Router()
 
 //GET ONE USER
-router.get("/find/:id", async (req, res) => {
+router.get("/find/:id", verify, async (req, res) => {
         try {
             const findUser = await users.findById(req.params.id)
-            res.status(200).json(findUser)
+            const { password, wallet_privateAddress, ...info } = findUser._doc
+            res.status(200).json({info})
         } catch (err) {
             res.status(404).json('not found')
     }
@@ -27,7 +28,7 @@ router.get("/find", async (req, res) => {
 
 //UPDATE USER
 
-router.put("/:id", verify, async (req, res) => {
+router.patch("/:id", verify, async (req, res) => {
     if(req.user.id === req.params.id) {
         if(req.body.password) {
             req.body.password = CryptoJS.AES.encrypt(req.body.password, process.env.MY_SECRET_KEY).toString()
