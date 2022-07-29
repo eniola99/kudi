@@ -22,7 +22,7 @@ const mailgun = require('mailgun-js')({apiKey: api_key, domain: domain});
 router.post('/register', async(req, res) => {
     users.findOne({email: req.body.email}, async(error, user) => {
         if(error) {
-            return res.status(500).json('something went wrong')
+            return res.status(500).json('something went wronggg')
         }
         else if(req.body.email == null) {
             return res.status(403).json('please enter a valid email')
@@ -36,7 +36,7 @@ router.post('/register', async(req, res) => {
                 lastName: req.body.lastName,
                 username: req.body.username,
                 email: req.body.email,
-                wallet_publicAddress: wallet.publicAddress,
+                wallet_publicAddress:  wallet.publicAddress,
                 wallet_privateAddress: CryptoJS.AES.encrypt(wallet.privateKey.toString('hex'), process.env.MY_SECRET_KEY).toString(),
                 password: CryptoJS.AES.encrypt(req.body.password, process.env.MY_SECRET_KEY).toString(),
             })
