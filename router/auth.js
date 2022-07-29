@@ -15,14 +15,14 @@ dotenv.config()
 const wallet = new CoinKey.createRandom()
 
 
-const api_key = process.env.api_key
-const domain = process.env.domain_name
-const mailgun = require('mailgun-js')({apiKey: api_key, domain: domain});
+const api = process.env.API_KEY
+const domain = process.env.DOMAIN_NAME
+const mailgun = require('mailgun-js')({apiKey: api, domain: domain});
 
 router.post('/register', async(req, res) => {
     users.findOne({email: req.body.email}, async(error, user) => {
         if(error) {
-            return res.status(500).json('something went wronggg')
+            return res.status(500).json('something went wrong')
         }
         else if(req.body.email == null) {
             return res.status(403).json('please enter a valid email')
