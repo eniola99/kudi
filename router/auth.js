@@ -3,17 +3,21 @@ const CryptoJS = require("crypto-js")
 const dotenv = require('dotenv')
 const jwt = require('jsonwebtoken')
 const users = require('../models/user')
-const nodemailer = require('nodemailer')
-const { google } = require('googleapis');
 const Token = require('../models/token')
 const crypto = require('crypto')
 const CoinKey = require('coinkey')
+
 
 
 const router = express.Router()
 dotenv.config()
 
 const wallet = new CoinKey.createRandom()
+
+
+const api_key = process.env.api_key
+const domain = process.env.domain_name
+const mailgun = require('mailgun-js')({apiKey: api_key, domain: domain});
 
 router.post('/register', async(req, res) => {
     users.findOne({email: req.body.email}, async(error, user) => {
@@ -26,9 +30,6 @@ router.post('/register', async(req, res) => {
         else if(user) {
             return res.status(500).json(`account already exist`)
         }
-        else if({username: req.body.username}) {
-            return res.status(500).json(`username already exist`)
-        }
         else{
             user = new users({
                 firstName: req.body.firstName,
@@ -40,69 +41,34 @@ router.post('/register', async(req, res) => {
                 password: CryptoJS.AES.encrypt(req.body.password, process.env.MY_SECRET_KEY).toString(),
             })
             try{
-                const saveNewUser = await user.save()
-                res.status(200).json(`${saveNewUser.email} as been saved successfully`)
-            }catch(error) {
-                res.status(400).json('something went wrong')
-            }
+                await user.save()
+                res.status(200).json(`account as been saved successfully`)
 
                   //generate token and save
-            var token = new Token({ _userId: user._id, token: crypto.randomBytes(16).toString('hex') });
+            const token = new Token({ _userId: user._id, token: crypto.randomBytes(16).toString('hex') });
             token.save()
 
     
             const url = `https://kudiii.herokuapp.com/auth/verify/${token.token}`
-            
-            async function sendMail() {
-                const CLIENT_EMAIL = process.env.APP_MAIL;
-                const CLIENT_ID = process.env.EMAIL_CLIENT_ID;
-                const CLIENT_SECRET = process.env.EMAIL_CLIENT_SECRET;
-                const REDIRECT_URL = process.env.EMAIL_CLIENT_REDIRECT_URL;
-                const REFRESH_TOKEN = process.env.EMAIL_REFRESH_TOKEN;
-            
-                const OAuth2Client = new google.auth.OAuth2(
-                    CLIENT_ID,
-                    CLIENT_SECRET,
-                    REDIRECT_URL
-                );
-            
-                OAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN })
-            
-                try {
-                    //generate the access token on the fly
-                    const accessToken = await OAuth2Client.getAccessToken();
-            
-                    //creating the mail envelop
-                    const transport = nodemailer.createTransport({
-                        service: "gmail",
-                        auth: {
-                            type: 'OAuth2',
-                            user: CLIENT_EMAIL,
-                            clientId: CLIENT_ID,
-                            clientSecret: CLIENT_SECRET,
-                            refreshToken: REFRESH_TOKEN,
-                            accessToken: accessToken
-                        }
-                    })
-            
-                    const mailOptions = {
-                        from:{
-                            name: "kudiCrypto",
-                            address: process.env.APP_MAIL,
-                            },
-                        to: `${req.body.email}`,
-                        subject: 'WELCOME TO kudiCrypto FAMILY',
-                        html: `Click <a href = '${url}'>here</a> to confirm your email.`
-                    };
-            
-                    const result = await transport.sendMail(mailOptions);
-                    return result
-            
-                } catch (error) {
-                    return error
-                }
+
+            const data = {
+                from: 'KudiCrypto <kudicrypto1@gmail.com>',
+                to: `${req.body.email}`,
+                subject: 'Welcome to KudiCrypto',
+                html: `Click <a href = '${url}'>here</a> to confirm your email.`
+              };
+               
+              mailgun.messages().send(data, function (error, body) {
+                  if(error) {
+                      console.log(error)
+                  }else{
+                    console.log(body);
+                  }
+              });
             }
-            sendMail()
+            catch(error) {
+                res.status(400).json('username already exist')
+            }
         }
     })
 })
