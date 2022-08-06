@@ -40,7 +40,7 @@ router.post('/register', async(req, res) => {
                 wallet_privateAddress: CryptoJS.AES.encrypt(wallet.privateKey.toString('hex'), process.env.MY_SECRET_KEY).toString(),
                 password: CryptoJS.AES.encrypt(req.body.password, process.env.MY_SECRET_KEY).toString(),
             })
-            try{
+
                 await user.save()
                 res.status(200).json(`account as been saved successfully`)
 
@@ -60,15 +60,12 @@ router.post('/register', async(req, res) => {
                
               mailgun.messages().send(data, function (error, body) {
                   if(error) {
-                      console.log(error)
+                      console.log(error) 
                   }else{
                     console.log(body);
                   }
               });
-            }
-            catch(error) {
-                res.status(400).json('username already exist')
-            }
+
         }
     })
 })
