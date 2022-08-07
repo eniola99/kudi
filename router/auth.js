@@ -51,7 +51,13 @@ router.post('/register', async(req, res) => {
             const mailgun = new Mailgun({apiKey: api, domain: domain})
 
             const data = {
-                from: 'KudiCrypto <kudicrypto1@gmail.com>',
+                from: process.env.MAILGUN_SMTP_SERVER,          //'KudiCrypto <kudicrypto1@gmail.com>',
+                port: process.env.MAILGUN_SMTP_PORT,
+                domain: 'https://kudiii.herokuapp.com/',
+                user_name: process.env.MAILGUN_SMTP_LOGIN,
+                password: process.env.MAILGUN_SMTP_PASSWORD,
+                authentication: plain,
+                enable_starttls_auto: true,
                 to: `${req.body.email}`,
                 subject: 'Welcome to KudiCrypto',
                 html: `Click <a href = '${url}'>here</a> to confirm your email.`
