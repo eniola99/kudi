@@ -57,9 +57,9 @@ router.post('/register', async(req, res) => {
                
               mailgun.messages().send(data, function (error, body) {
                   if(error) {
-                      console.log(error) 
+                      console.log('mail not send, problem with the server')
                   }else{
-                    console.log(body);
+                    console.log('mail sent successfully');
                   }
               });
 
