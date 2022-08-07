@@ -15,8 +15,8 @@ dotenv.config()
 const wallet = new CoinKey.createRandom()
 
 
-const api = process.env.API_KEY
-const domain = process.env.DOMAIN_NAME
+const api = process.env.MAILGUN_API_KEY
+const domain = process.env.MAILGUN_DOMAIN
 const mailgun = require('mailgun-js')({apiKey: api, domain: domain});
 
 router.post('/register', async(req, res) => {
@@ -34,7 +34,6 @@ router.post('/register', async(req, res) => {
             user = new users({
                 firstName: req.body.firstName,
                 lastName: req.body.lastName,
-                username: req.body.username,
                 email: req.body.email,
                 wallet_publicAddress:  wallet.publicAddress,
                 wallet_privateAddress: CryptoJS.AES.encrypt(wallet.privateKey.toString('hex'), process.env.MY_SECRET_KEY).toString(),
