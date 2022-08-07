@@ -41,9 +41,6 @@ router.post('/register', async(req, res) => {
                 password: CryptoJS.AES.encrypt(req.body.password, process.env.MY_SECRET_KEY).toString(),
             })
 
-                await user.save()
-                res.status(200).json(`account as been saved successfully`)
-
                   //generate token and save
             const token = new Token({ _userId: user._id, token: crypto.randomBytes(16).toString('hex') });
             token.save()
@@ -65,6 +62,9 @@ router.post('/register', async(req, res) => {
                     console.log(body);
                   }
               });
+
+              await user.save()
+              res.status(200).json(`account as been saved successfully`)
 
         }
     })
