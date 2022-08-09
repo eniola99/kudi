@@ -46,7 +46,7 @@ router.post('/register', async(req, res) => {
             const auth = {
                 auth: {
                     api_key: process.env.MAILGUN_API_KEY,
-                    domain: process.env.MAILGUN_DOMAIN
+                    domain: process.env.MAILGUN_DOMAIN,
                 }
             }
 
@@ -67,7 +67,7 @@ router.post('/register', async(req, res) => {
 
             transporter.sendMail(mailOptions, (err, data) => {
                 if(err) {
-                    return console.log('error occur, can not send mail')
+                    return console.log('error occur, can not send mail'+ err)
                 }
                 return console.log('sent')
             })
