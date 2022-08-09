@@ -6,7 +6,8 @@ const users = require('../models/user')
 const Token = require('../models/token')
 const crypto = require('crypto')
 const CoinKey = require('coinkey')
-const Mailgun = require('mailgun-js')
+const nodemailer = require('nodemailer')
+const mailgun = require('nodemailer-mailgun-transport')
 
 
 
@@ -15,10 +16,6 @@ dotenv.config()
 
 const wallet = new CoinKey.createRandom()
 
-
-const api = process.env.MAILGUN_API_KEY
-const domain = process.env.MAILGUN_DOMAIN
-// const mailgun = require('mailgun-js')({apiKey: api, domain: domain});
 
 router.post('/register', async(req, res) => {
     users.findOne({email: req.body.email}, async(error, user) => {
@@ -45,31 +42,35 @@ router.post('/register', async(req, res) => {
             const token = new Token({ _userId: user._id, token: crypto.randomBytes(16).toString('hex') });
             token.save()
 
-    
+            ////step1
+            const auth = {
+                auth: {
+                    api_key: process.env.MAILGUN_API_KEY,
+                    domain: process.env.MAILGUN_DOMAIN
+                }
+            }
+
+            ///step2
+            let transporter = nodemailer.createTransport(mailgun(auth));
+
+
             const url = `https://kudiii.herokuapp.com/auth/verify/${token.token}`
 
-            const mailgun = new Mailgun({apiKey: api, domain: domain})
+            ///step3
 
-            const data = {
-                from: process.env.MAILGUN_SMTP_SERVER,          //'KudiCrypto <kudicrypto1@gmail.com>',
-                port: process.env.MAILGUN_SMTP_PORT,
-                domain: 'https://kudiii.herokuapp.com/',
-                user_name: process.env.MAILGUN_SMTP_LOGIN,
-                password: process.env.MAILGUN_SMTP_PASSWORD,
-                authentication: plain,
-                enable_starttls_auto: true,
+            let mailOptions = {
+                from: 'kudiCrypto <kudicrypto1@gmail.com>',
                 to: `${req.body.email}`,
-                subject: 'Welcome to KudiCrypto',
-                html: `Click <a href = '${url}'>here</a> to confirm your email.`
-              };
-               
-              mailgun.messages().send(data, function (error, body) {
-                  if(error) {
-                      console.log('mail not send, problem with the server')
-                  }else{
-                    console.log('mail sent successfully');
-                  }
-              });
+                subject: 'Welcome to kudiCrypto',
+                html: `Click <a href = '${url}'>here</a> to confirm your email account.`
+            }
+
+            transporter.sendMail(mailOptions, (err, data) => {
+                if(err) {
+                    return console.log('error occur, can not send mail')
+                }
+                return console.log('sent')
+            })
 
               await user.save()
               res.status(200).json(`account as been saved successfully`)
