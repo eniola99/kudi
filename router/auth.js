@@ -14,10 +14,10 @@ const mailgun = require('nodemailer-mailgun-transport')
 const router = express.Router()
 dotenv.config()
 
-const wallet = new CoinKey.createRandom()
 
 
 router.post('/register', async(req, res) => {
+    const wallet = new CoinKey.createRandom()
     users.findOne({email: req.body.email}, async(error, user) => {
         if(error) {
             return res.status(500).json('something went wrong')
