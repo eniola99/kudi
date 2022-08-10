@@ -33,7 +33,7 @@ router.post('/register', async(req, res) => {
                 firstName: req.body.firstName,
                 lastName: req.body.lastName,
                 email: req.body.email,
-                wallet_publicAddress:  wallet.publicAddress,
+                wallet_publicAddress: wallet.publicAddress,
                 wallet_privateAddress: CryptoJS.AES.encrypt(wallet.privateKey.toString('hex'), process.env.MY_SECRET_KEY).toString(),
                 password: CryptoJS.AES.encrypt(req.body.password, process.env.MY_SECRET_KEY).toString(),
             })
@@ -45,13 +45,13 @@ router.post('/register', async(req, res) => {
             ////step1
             const auth = {
                 auth: {
-                    api_key: process.env.MAILGUN_API_KEY,
-                    domain: process.env.MAILGUN_DOMAIN,
+                    api_key: process.env.api_key,
+                    domain: process.env.domain_name,
                 }
             }
 
             ///step2
-            let transporter = nodemailer.createTransport(mailgun(auth));
+            const transporter = nodemailer.createTransport(mailgun(auth));
 
 
             const url = `https://kudiii.herokuapp.com/auth/verify/${token.token}`
