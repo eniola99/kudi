@@ -56,8 +56,8 @@ router.post('/register', async(req, res) => {
                 port: process.env.MAILGUN_SMTP_PORT,
                 secure: true,
                 auth: {
-                    api_key: process.env.MAILGUN_API_KEY,
-                    domain: process.env.MAILGUN_DOMAIN,
+                   // api_key: process.env.MAILGUN_API_KEY,
+                   // domain: process.env.MAILGUN_DOMAIN,
                     user: process.env.MAILGUN_SMTP_LOGIN,
                     pass: process.env.MAILGUN_SMTP_PASSWORD
                 },
