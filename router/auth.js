@@ -43,15 +43,29 @@ router.post('/register', async(req, res) => {
             token.save()
 
             ////step1
-            const auth = {
-                auth: {
-                    api_key: process.env.api_key,
-                    domain: process.env.domain_name,
-                }
-            }
+            // const auth = {
+            //     auth: {
+            //         api_key: process.env.api_key,
+            //         domain: process.env.domain_name,
+            //     }
+            // }
 
             ///step2
-            const transporter = nodemailer.createTransport(mailgun(auth));
+            const transporter = nodemailer.createTransport({
+                host: process.env.MAILGUN_SMTP_SERVER,
+                port: process.env.MAILGUN_SMTP_PORT,
+                secure: true,
+                auth: {
+                    api_key: process.env.MAILGUN_API_KEY,
+                    domain: process.env.MAILGUN_DOMAIN,
+                    user: process.env.MAILGUN_SMTP_LOGIN,
+                    pass: process.env.MAILGUN_SMTP_PASSWORD
+                },
+                tls: {
+                    // do not fail on invalid certs
+                    rejectUnauthorized: false,
+                }
+            });
 
 
             const url = `https://kudiii.herokuapp.com/auth/verify/${token.token}`
