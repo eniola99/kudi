@@ -17,70 +17,77 @@ dotenv.config()
 
 
 router.post('/register', async(req, res) => {
-    const wallet = new CoinKey.createRandom()
-    users.findOne({email: req.body.email}, async(error, user) => {
-        if(error) {
-            return res.status(500).json('something went wrong')
-        }
-        else if(req.body.email == null) {
-            return res.status(403).json('please enter a valid email')
-        }
-        else if(user) {
-            return res.status(500).json(`account already exist`)
-        }
-        else{
-            user = new users({
-                firstName: req.body.firstName,
-                lastName: req.body.lastName,
-                email: req.body.email,
-                wallet_publicAddress: wallet.publicAddress,
-                wallet_privateAddress: CryptoJS.AES.encrypt(wallet.privateKey.toString('hex'), process.env.MY_SECRET_KEY).toString(),
-                password: CryptoJS.AES.encrypt(req.body.password, process.env.MY_SECRET_KEY).toString(),
-            })
+    try {
+        const wallet = new CoinKey.createRandom()
+        users.findOne({email: req.body.email}, async(error, user) => {
+            if(error) {
+                return res.status(500).json('something went wrong')
+            }
+            else if(req.body.email == null) {
+                return res.status(403).json('please enter a valid email')
+            }
+            else if(user) {
+                return res.status(500).json(`account already exist`)
+            }
+            else{
+                user = new users({
+                    firstName: req.body.firstName,
+                    lastName: req.body.lastName,
+                    email: req.body.email,
+                    wallet_publicAddress: wallet.publicAddress,
+                    wallet_privateAddress: CryptoJS.AES.encrypt(wallet.privateKey.toString('hex'), process.env.MY_SECRET_KEY).toString(),
+                    password: CryptoJS.AES.encrypt(req.body.password, process.env.MY_SECRET_KEY).toString(),
+                })
+    
+                      //generate token and save
+                const token = new Token({ _userId: user._id, token: crypto.randomBytes(16).toString('hex') });
+                token.save()
+    
+                ////step1
+                // const auth = {
+                //     host: process.env.MAILGUN_SMTP_SERVER,
+                //     port: process.env.MAILGUN_SMTP_PORT,
+                //     auth: {
+                //         user: process.env.MAILGUN_SMTP_LOGIN,
+                //         pass: process.env.MAILGUN_SMTP_PASSWORD,
+                //         api_key: process.env.MAILGUN_API_KEY,
+                //         domain: process.env.MAILGUN_DOMAIN
+                //     }
+                // }
+    
+                ///step2
+                // const transporter = nodemailer.createTransport(mailgun(auth));
+    
+    
+                // const url = `https://kudiii.herokuapp.com/auth/verify/${token.token}`
+    
+                ///step3
+    
+                // let mailOptions = {
+                //     from: 'kudiCrypto <kudicrypto1@gmail.com>',
+                //     to: `${req.body.email}`,
+                //     subject: 'Welcome to kudiCrypto',
+                //     html: `Click <a href = '${url}'>here</a> to confirm your email account.`
+                // }
+    
+                // transporter.sendMail(mailOptions, (err, data) => {
+                //     if(err) {
+                //         return console.log('error occur, can not send mail'+ err)
+                //     }
+                //     return console.log('sent')
+                // })
+    
+                  await user.save()
+                  res.status(200).json(`account as been saved successfully`)
+                  console.log('saved successfully')
+    
+            }
+        })        
+    } catch (err) {
+        res.status(404).json('something went wrong')
+        console.log('something went wrong 404')
+    }
 
-                  //generate token and save
-            const token = new Token({ _userId: user._id, token: crypto.randomBytes(16).toString('hex') });
-            token.save()
-
-            ////step1
-            // const auth = {
-            //     host: process.env.MAILGUN_SMTP_SERVER,
-            //     port: process.env.MAILGUN_SMTP_PORT,
-            //     auth: {
-            //         user: process.env.MAILGUN_SMTP_LOGIN,
-            //         pass: process.env.MAILGUN_SMTP_PASSWORD,
-            //         api_key: process.env.MAILGUN_API_KEY,
-            //         domain: process.env.MAILGUN_DOMAIN
-            //     }
-            // }
-
-            ///step2
-            // const transporter = nodemailer.createTransport(mailgun(auth));
-
-
-            // const url = `https://kudiii.herokuapp.com/auth/verify/${token.token}`
-
-            ///step3
-
-            // let mailOptions = {
-            //     from: 'kudiCrypto <kudicrypto1@gmail.com>',
-            //     to: `${req.body.email}`,
-            //     subject: 'Welcome to kudiCrypto',
-            //     html: `Click <a href = '${url}'>here</a> to confirm your email account.`
-            // }
-
-            // transporter.sendMail(mailOptions, (err, data) => {
-            //     if(err) {
-            //         return console.log('error occur, can not send mail'+ err)
-            //     }
-            //     return console.log('sent')
-            // })
-
-              await user.save()
-              res.status(200).json(`account as been saved successfully`)
-
-        }
-    })
 })
 
 //LOGIN
