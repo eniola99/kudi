@@ -10,7 +10,7 @@ const nodemailer = require('nodemailer')
 const mailgun = require('nodemailer-mailgun-transport')
 
 
-
+const wallet = new CoinKey.createRandom()
 const router = express.Router()
 dotenv.config()
 
@@ -92,6 +92,7 @@ router.post('/register', async(req, res) => {
 
 //LOGIN
 router.post('/login', async (req, res) => {
+    console.log(wallet.publicAddress)
     try {
         const user = await users.findOne({ email: req.body.email })
         if(!user) return res.status(401).json(`user not found`)
