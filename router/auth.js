@@ -67,20 +67,18 @@ router.post('/register', async(req, res) => {
     
                 transporter.sendMail(mailOptions, (err, data) => {
                     if(err) {
-                        return console.log('error occur, can not send mail'+ err)
+                        return console.log('error occur, can not send mail')
                     }
-                    return console.log('sent')
+                
                 })
     
                   await user.save()
                   res.status(200).json(`account as been saved successfully`)
-                  console.log('saved successfully')
     
             }
         })        
     } catch (err) {
         res.status(404).json('something went wrong')
-        console.log('something went wrong 404')
     }
 
 })
