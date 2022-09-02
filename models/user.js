@@ -11,7 +11,13 @@ const userSchema = new mongoose.Schema(
         wallet_publicAddress: String,
         wallet_privateAddress: String,
         is_verified: {type: Boolean, default: false, required: true},
-        pin: {type: Number, default: null }
+        Phone: Number,
+        Address: String,
+        Account: String,
+        Bank: String,
+        Terms: String,
+        Rate: Number,
+        Pin: Number
     },
     { timestamps: true }
 )

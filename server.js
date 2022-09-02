@@ -8,7 +8,7 @@ dotenv.config()
 const app = express()
 app.use(express.json())
 app.use(cors())
-const PORT = process.env.PORT || 5000
+const PORT = process.env.PORT || 8800
 const url = process.env.mongooseConnect
 mongoose.connect(url)
 const connection = mongoose.connection
