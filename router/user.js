@@ -118,8 +118,8 @@ router.post('/send/:id', async(req, res) => {
              //checking if enough funds in the wallet
             fee = transactionSize * 20
             if (totalAmountAvailable - satoshiToSend - fee < 0) {
-                res.send('balance is too low fro this transaction')
-                throw new Error('Balance is too low for this transaction')
+                res.send('balance is too low for this transaction')
+                return
             }
     
             //setting transaction input
@@ -138,9 +138,10 @@ router.post('/send/:id', async(req, res) => {
                     tx_hex: serializedTX
                 },
             })
+            res.status(200).send('transaction published on blockchain')
     
         } catch (error) {
-            res.status(500).json('server error')
+            res.status(500).json('internal server error')
         }
 })
 
