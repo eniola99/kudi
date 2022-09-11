@@ -14,27 +14,41 @@ dotenv.config()
 router.get("/find/:id", verify, async (req, res) => {
         try {
             const findUser = await users.findById(req.params.id)
-            const { password, wallet_privateAddress, ...info } = findUser._doc
+            const { password, wallet_privateAddress, _id, ...info } = findUser._doc
             res.status(200).json({info})
         } catch (err) {
             res.status(500).json('something went wrong, try again later')
     }
 })
 
-//GET WALLET ADDRESS OF ACCOUNT
-router.get("/wallet/balance/:id", verify, async (req, res) => {
+//GET ALL USER WITHOUT THE ID
+router.get("/active/:id", verify, async(req, res) => {
     try {
-        const findWallet = await users.findOne({id: req.params})
-        const walletAddress = findWallet.wallet_publicAddress
-
-        res.status(200).json(walletAddress)
-    } catch (err) {
-        res.status(500).json('something went wrong')
+        const activeUser = await users.find()
+        const value = req.params.id
+        const activeUserFinal = activeUser.filter((item) => item.id !== value)
+        let input = []
+        activeUserFinal.forEach((admin) => {
+            const val = {
+                name: admin.lastName,
+                address: admin.wallet_publicAddress,
+                bankAcc: admin.Account,
+                addrss: admin.Address,
+                bankName: admin.Bank,
+                phoneNumber: admin.Phone,
+                exchangeRate: admin.Rate,
+                message: admin.Terms
+            }
+            input.push(val)
+        })
+        res.status(200).json(input)
+    } catch (error) {
+        console.log('an error occur ' + error)
     }
 })
 
 //GET ALL USER
-router.get("/find", async (req, res) => {
+router.get("/find", verify, async (req, res) => {
     try {        
         const usersList = await users.find()
         res.status(200).json(usersList)
@@ -79,7 +93,7 @@ router.delete("/:id", verify, async (req, res) => {
 
 
 //SENDING BITCOIN
-router.post('/send/:id', async(req, res) => {
+router.post('/send/:id', verify, async(req, res) => {
     try {
     const findUser = await users.findById(req.params.id)
         const userAddress = findUser.wallet_publicAddress
