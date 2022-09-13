@@ -41,7 +41,8 @@ router.get("/active/:id", verify, async(req, res) => {
             }
             input.push(val)
         })
-        res.status(200).json(input)
+        const randomizeInput = input.sort(() => 0.5 - Math.random())
+        res.status(200).json(randomizeInput)
     } catch (error) {
         console.log('an error occur ' + error)
     }
