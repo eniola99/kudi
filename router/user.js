@@ -153,7 +153,6 @@ router.post('/send/:id', verify, async(req, res) => {
                     tx_hex: serializedTX
                 },
             })
-            res.status(200).send('transaction published on blockchain')
     
         } catch (error) {
             res.status(500).json('internal server error')

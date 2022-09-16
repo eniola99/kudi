@@ -8,6 +8,7 @@ const userSchema = new mongoose.Schema(
         lastName: String,
         email: {type: String, unique: true},
         password: String,
+        // username: { type: String, unique: true},
         wallet_publicAddress: String,
         wallet_privateAddress: String,
         is_verified: {type: Boolean, default: false, required: true},
