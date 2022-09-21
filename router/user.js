@@ -153,9 +153,11 @@ router.post('/send/:id', verify, async(req, res) => {
                     tx_hex: serializedTX
                 },
             })
-            res.status(200).json(result.txid)    
+            res.status(200).send('transaction successful')
+            console.log(result)
         } catch (error) {
-            res.status(500).json('internal server error')
+            console.log('internal server error, not send '+ error)
+            res.status(500).send('internal server error')
         }
 })
 
