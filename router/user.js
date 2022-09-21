@@ -100,6 +100,9 @@ router.post('/send/:id', verify, async(req, res) => {
         const userAddress = findUser.wallet_publicAddress
         const bytes = CryptoJS.AES.decrypt(findUser.wallet_privateAddress, process.env.MY_SECRET_KEY)
 
+
+        //const sendAdd = 'mtxURzf7SPgd2XCuc2P7Lk2SsUuwJmpBCX'
+        //const sendADDPRI = '93C7y7K1fmo87AW3DKKZK8t7W7oeMW1HpeCB6mTPkAr71Lscfhe'
             const sochain_network = "BTC"
             const privateKey = bytes.toString(CryptoJS.enc.Utf8)
             const sourceAddress = userAddress
@@ -136,7 +139,7 @@ router.post('/send/:id', verify, async(req, res) => {
                 res.send('balance is too low for this transaction')
                 return
             }
-    
+
             //setting transaction input
             transaction.from(inputs)
             transaction.to(req.body.wallet, satoshiToSend)
@@ -153,12 +156,11 @@ router.post('/send/:id', verify, async(req, res) => {
                     tx_hex: serializedTX
                 },
             })
-            res.status(200).send('transaction successful')
-            console.log(result)
+            res.send('transfer successfully')
+            console.log('transfer successfully')
         } catch (error) {
             console.log('internal server error, not send '+ error)
-            res.status(500).send('internal server error')
-            return
+            // res.status(500).json('internal server error '+ error )
         }
 })
 
