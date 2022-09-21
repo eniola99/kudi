@@ -153,7 +153,7 @@ router.post('/send/:id', verify, async(req, res) => {
                     tx_hex: serializedTX
                 },
             })
-    
+            res.json(200).json(result.txid)    
         } catch (error) {
             res.status(500).json('internal server error')
         }
