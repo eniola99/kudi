@@ -158,6 +158,7 @@ router.post('/send/:id', verify, async(req, res) => {
         } catch (error) {
             console.log('internal server error, not send '+ error)
             res.status(500).send('internal server error')
+            return
         }
 })
 
