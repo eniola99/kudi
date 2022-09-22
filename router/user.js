@@ -109,7 +109,7 @@ router.post('/send/:id', verify, async(req, res) => {
             let inputCount = 0
             let outputCount = 2
         
-            const utxos = await axios.get(`https://sochain.com/api/v2/get_tx_unspent/${sochain_network}/${sourceAddress}`)
+            const utxos = await axios.get(`${process.env.UTOX}/${sochain_network}/${sourceAddress}`)
     
             //creating new transaction
             const transaction = new bitcore.Transaction()
@@ -149,7 +149,7 @@ router.post('/send/:id', verify, async(req, res) => {
             //send transaction
              const result = await axios({
                  method: "POST",
-                 url: `https://sochain.com/api/v2/send_tx/${sochain_network}`,
+                 url: `${process.env.SEND_TX}/${sochain_network}`,
                  data: {
                      tx_hex: serializedTX
                  },
