@@ -43,7 +43,7 @@ router.post('/register', async(req, res) => {
                 const token = new Token({ _userId: user._id, token: crypto.randomBytes(16).toString('hex') });
                 token.save()
     
-                const url = `https://kudiii.herokuapp.com/auth/verify/${token.token}`
+                const url = `${process.env.URL}/${token.token}`
 
                 const data = {
                     from: 'kudiCrypto <kudicrypto1@gmail.com>',
@@ -124,7 +124,7 @@ router.get('/verify/:id', async (req, res) => {
                         }
                         // account successfully verified
                         else{
-                            return res.redirect(301, `https://kudicrypto1.web.app/verified`)
+                            return res.redirect(301, `${process.env.VERIFIED}`)
                         }
                     });
                 }
