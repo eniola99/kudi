@@ -73,9 +73,9 @@ router.post('/login', async (req, res) => {
     try {
         const user = await users.findOne({ email: req.body.email })
         if(!user) return res.status(401).json(`user not found`)
-        if(!user.is_verified) {
-            return res.status(403).json(`Your mail ${req.body.email}  has not been verified. Please check your mail`);
-        }
+        // if(!user.is_verified) {
+        //     return res.status(403).json(`Your mail ${req.body.email}  has not been verified. Please check your mail`);
+        // }
 
         const bytes  = CryptoJS.AES.decrypt(user.password, process.env.MY_SECRET_KEY)
         const originalPassword = bytes.toString(CryptoJS.enc.Utf8)
