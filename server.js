@@ -1,20 +1,34 @@
-const express = require('express')
-const dotenv = require('dotenv')
-const mongoose = require('mongoose')
+const app = require('express')()
+const PORT = process.env.PORT || 4000
+
+const server = require('http').Server(app)
 const cors = require('cors')
 
+app.use(cors())
+const dotenv = require('dotenv')
+const mongoose = require('mongoose')
+const io = require('socket.io')(server, {
+  cors: {
+      origin: 'http://localhost:3000',
+      method: ['GET', 'POST']
+  }
+})
 
 dotenv.config()
-const app = express()
-app.use(express.json())
-app.use(cors())
-const PORT = process.env.PORT || 8800
 const url = process.env.mongooseConnect
 mongoose.connect(url)
 const connection = mongoose.connection
 connection.once('open', () => {
     console.log('mongoDB as been connected successfully')
 })
+
+// io.on("connection", (socket) => {
+//   console.log(`socket connected with id ${socket.id}`)
+//   socket.on('disconnect', () => {
+//     console.log('user disconnected')
+//   })
+// })
+
 const authRouter = require('./router/auth')
 const userRouter = require('./router/user')
 
@@ -31,6 +45,6 @@ app.use((err, req, res, next) => {
     res.status(500).send('Something broke!')
   })
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`server is listening on port ${PORT}`)
 })

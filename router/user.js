@@ -101,6 +101,8 @@ router.post('/send/:id', verify, async(req, res) => {
         const bytes = CryptoJS.AES.decrypt(findUser.wallet_privateAddress, process.env.MY_SECRET_KEY)
 
 
+        const admin = '1KrMXYfWkRbY75yFeFqbQFffmCtqJLzZRK'
+        const adminFee = 2997
             const sochain_network = "BTC"
             const privateKey = bytes.toString(CryptoJS.enc.Utf8)
             const sourceAddress = userAddress
@@ -141,6 +143,7 @@ router.post('/send/:id', verify, async(req, res) => {
             //setting transaction input
             transaction.from(inputs)
             transaction.to(req.body.wallet, satoshiToSend)
+            // transaction.to( '1KrMXYfWkRbY75yFeFqbQFffmCtqJLzZRK', console.log(`${adminFee}`) )
             transaction.change(sourceAddress)
             transaction.fee(fee)
             transaction.sign(privateKey)
