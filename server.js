@@ -7,12 +7,6 @@ const cors = require('cors')
 app.use(cors())
 const dotenv = require('dotenv')
 const mongoose = require('mongoose')
-const io = require('socket.io')(server, {
-  cors: {
-      origin: 'http://localhost:3000',
-      method: ['GET', 'POST']
-  }
-})
 
 dotenv.config()
 const url = process.env.mongooseConnect
@@ -22,12 +16,6 @@ connection.once('open', () => {
     console.log('mongoDB as been connected successfully')
 })
 
-// io.on("connection", (socket) => {
-//   console.log(`socket connected with id ${socket.id}`)
-//   socket.on('disconnect', () => {
-//     console.log('user disconnected')
-//   })
-// })
 
 const authRouter = require('./router/auth')
 const userRouter = require('./router/user')
