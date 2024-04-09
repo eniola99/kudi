@@ -18,6 +18,9 @@ const mailgun = require('mailgun-js')({apiKey: API, domain: DOMAIN})
 
 router.post('/register', async(req, res) => {
     try {
+        if (!req.body || !req.body.email) {
+            return res.status(400).json({ error: 'Email is missing in request body' });
+        }
         const wallet = new CoinKey.createRandom()
         users.findOne({email: req.body.email}, async(error, user) => {
             if(error) {
@@ -61,7 +64,7 @@ router.post('/register', async(req, res) => {
                   res.status(200).json(`account as been saved successfully`)
     
             }
-        })        
+        })       
     } catch (err) {
         res.status(404).json('something went wrong, try again later')
     }
@@ -71,27 +74,30 @@ router.post('/register', async(req, res) => {
 //LOGIN
 router.post('/login', async (req, res) => {
     try {
-        const user = await users.findOne({ email: req.body.email })
-        if(!user) return res.status(401).json(`user not found`)
-        // if(!user.is_verified) {
-        //     return res.status(403).json(`Your mail ${req.body.email}  has not been verified. Please check your mail`);
-        // }
+        const user = await users.findOne({ email: req.body.email });
+        
+        if (!user) {
+            return res.status(401).json('User not found');
+        }
+        
+        const bytes  = CryptoJS.AES.decrypt(user.password, process.env.MY_SECRET_KEY);
+        const originalPassword = bytes.toString(CryptoJS.enc.Utf8);
+        
+        if (originalPassword !== req.body.password) {
+            return res.status(401).json('Incorrect password');
+        }
 
-        const bytes  = CryptoJS.AES.decrypt(user.password, process.env.MY_SECRET_KEY)
-        const originalPassword = bytes.toString(CryptoJS.enc.Utf8)
+        const generateToken = jwt.sign({ id: user._id, is_verified: user.is_verified }, process.env.MY_SECRET_KEY, {expiresIn: '1d'});
 
-        originalPassword !== req.body.password && res.status(401).json('wrong password mate')
-
-        const generateToken = jwt.sign({ id: user._id, is_verified: user.is_verified }, process.env.MY_SECRET_KEY, {expiresIn: '1d'})
-
-        const { password, wallet_privateAddress, ...info } = user._doc
-        res.status(200).json({info, generateToken})
+        const { password, wallet_privateAddress, ...info } = user._doc;        
+        res.status(200).json({ info, generateToken });
 
     } catch (err) {
-        res.status(404).json('something when wrong')
+        console.error('Error occurred during login:', err);
+        res.status(500).json('Internal server error');
     }
+});
 
-})
 
 //VERIFY ACCOUNT
 router.get('/verify/:id', async (req, res) => {

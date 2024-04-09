@@ -1,5 +1,6 @@
 const app = require('express')()
-const PORT = process.env.PORT || 4000
+const bodyParser = require('body-parser');
+const PORT = process.env.PORT || 8080
 
 const server = require('http').Server(app)
 const cors = require('cors')
@@ -16,6 +17,9 @@ connection.once('open', () => {
     console.log('mongoDB as been connected successfully')
 })
 
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 const authRouter = require('./router/auth')
 const userRouter = require('./router/user')
