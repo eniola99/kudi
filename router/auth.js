@@ -63,7 +63,7 @@ router.post('/register', async(req, res) => {
             }
         })        
     } catch (err) {
-        res.status(404).json('something went wrong')
+        res.status(404).json('something went wrong, try again later')
     }
 
 })
